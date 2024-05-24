@@ -12,7 +12,6 @@ public class MovieService {
     @Autowired
     private MovieRepository movieRepository;
     public List<Movie> allMovies(){
-        System.out.println(movieRepository.findAll());
         return movieRepository.findAll();
     }
 
