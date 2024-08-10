@@ -29,11 +29,10 @@ function App() {
       const data = await response.json();
 
       if (data && Array.isArray(data)) {
-        setMovies(data);
+        setMovies(data.map((movie) => ({ ...movie, genres: movie.genres || [] })));
       } else {
         throw new Error('Invalid data format received');
       }
-
     } catch (err) {
       console.error('Failed to fetch movies:', err.message);
     }
@@ -56,13 +55,27 @@ function App() {
 
       if (singleMovie && typeof singleMovie === 'object') {
         setMovie(singleMovie);
-        setReviews(singleMovie.reviews || []);
+
+        const reviewsResponse = await fetch(`http://localhost:8080/api/v1/movies/${singleMovie.imdbId}/reviews`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!reviewsResponse.ok) {
+          throw new Error(`HTTP error! Status: ${reviewsResponse.status} - ${reviewsResponse.statusText}`);
+        }
+
+        const reviewsData = await reviewsResponse.json();
+
+        // Store the reviews in the state
+        setReviews(reviewsData || []);
       } else {
         throw new Error('Invalid movie data format received');
       }
-
     } catch (error) {
-      console.error('Failed to fetch movie data:', error.message);
+      console.error('Failed to fetch movie data or reviews:', error.message);
     }
   };
 

@@ -14,7 +14,6 @@ const Hero = ({ movies }) => {
     function reviews(movieId) {
         navigate(`/Reviews/${movieId}`);
     }
-
     useEffect(() => {
         const backdropCount = movies[0]?.backdrops.length || 0;
         if (backdropCount > 1) {
@@ -49,7 +48,8 @@ const Hero = ({ movies }) => {
                                                 <img src={movie.poster} alt="" />
                                             </div>
                                             <div className='movie-title'>
-                                                <h4>{movie.title}</h4>
+                                                <h2>{movie.title}</h2>
+                                                <p>Genres: {movie.genres.join(', ')}</p> 
                                             </div>
                                             <div className='movie-buttons-container'>
                                                 <Link to={`/Trailer/${movie.trailerLink.substring(movie.trailerLink.length - 11)}`}>

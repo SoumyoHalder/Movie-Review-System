@@ -1,15 +1,25 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import ReviewForm from '../reviewForm/ReviewForm';
+import './Reviews.css';
 
 const Reviews = ({ getMovieData, movie, reviews, setReviews }) => {
     const revText = useRef();
     const { movieId } = useParams();
+    const [displayedReviews, setDisplayedReviews] = useState([]);
 
     useEffect(() => {
-        getMovieData(movieId);
+        if (movieId) {
+            getMovieData(movieId);
+        }
     }, [movieId, getMovieData]);
+
+    useEffect(() => {
+        if (reviews) {
+            setDisplayedReviews(reviews.slice(0, 5));
+        }
+    }, [reviews]);
 
     const addReview = async (e) => {
         e.preventDefault();
@@ -29,7 +39,7 @@ const Reviews = ({ getMovieData, movie, reviews, setReviews }) => {
                 },
                 body: JSON.stringify({
                     reviewBody: rev,
-                    imdbId: movieId,
+                    imdbId: movie?.imdbId,
                 }),
             });
 
@@ -39,7 +49,12 @@ const Reviews = ({ getMovieData, movie, reviews, setReviews }) => {
 
             const result = await response.json();
 
-            setReviews((prevReviews) => [...prevReviews, { body: rev, id: result.id }]);
+            setReviews((prevReviews) => {
+                const updatedReviews = [...prevReviews, { body: rev, id: result.id }];
+                setDisplayedReviews(updatedReviews.slice(0, 5));
+                return updatedReviews;
+            });
+
             revText.current.value = "";
         } catch (err) {
             console.error('Failed to add review:', err.message);
@@ -49,11 +64,11 @@ const Reviews = ({ getMovieData, movie, reviews, setReviews }) => {
     return (
         <Container>
             <Row>
-                <Col><h3>Reviews</h3></Col>
+                <Col><h3 className="review-header">Reviews</h3></Col>
             </Row>
             <Row className="mt-2">
                 <Col>
-                    <img src={movie?.poster} alt="Movie Poster" />
+                    <img className="movie-poster" src={movie?.poster} alt="Movie Poster" />
                 </Col>
                 <Col>
                     <Row>
@@ -66,15 +81,10 @@ const Reviews = ({ getMovieData, movie, reviews, setReviews }) => {
                             <hr />
                         </Col>
                     </Row>
-                    {reviews?.map((r) => (
-                        <React.Fragment key={r.id}> {/* Use a unique key */}
+                    {displayedReviews.map((r) => (
+                        <React.Fragment key={r.id}>
                             <Row>
-                                <Col>{r.body}</Col>
-                            </Row>
-                            <Row>
-                                <Col>
-                                    <hr />
-                                </Col>
+                                <Col className="review-body">{r.body}</Col>
                             </Row>
                         </React.Fragment>
                     ))}
